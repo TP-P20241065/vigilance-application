@@ -1,0 +1,142 @@
+<interface version="1.4" author="PygubuDesigner 0.39.3">
+  <project>
+    <settings>
+      <setting id="name">ZuriCam</setting>
+      <setting id="description">Aplicación en tiempo real</setting>
+      <setting id="module_name">ZuriCam</setting>
+      <setting id="template">application</setting>
+      <setting id="main_widget">main_window</setting>
+      <setting id="main_classname">login_window</setting>
+      <setting id="main_menu" />
+      <setting id="output_dir" />
+      <setting id="output_dir2" />
+      <setting id="import_tkvariables">False</setting>
+      <setting id="use_ttk_styledefinition_file">False</setting>
+      <setting id="use_i18n">False</setting>
+      <setting id="all_ids_attributes">False</setting>
+      <setting id="generate_code_onsave">False</setting>
+      <setting id="use_window_centering_code">False</setting>
+      <setting id="ttk_style_definition_file" />
+    </settings>
+    <customwidgets />
+  </project>
+  <object class="tk.Toplevel" id="main_window" named="True">
+
+    <property name="container">false</property>
+    <property name="height">360</property>
+    <property name="resizable">none</property>
+    <property name="title" translatable="yes">ZuriCam</property>
+    <property name="width">640</property>
+    <containerlayout manager="pack">
+      <property name="propagate">false</property>
+    </containerlayout>
+    <child>
+      <object class="ttk.Frame" id="frame3">
+        <property name="height">200</property>
+        <layout manager="pack">
+          <property name="padx">0</property>
+          <property name="pady">0</property>
+          <property name="side">top</property>
+        </layout>
+        <child>
+          <object class="ttk.Label" id="title_label" named="True">
+
+            <property name="compound">center</property>
+            <property name="font">TkTextFont</property>
+            <property name="padding">0</property>
+            <property name="text" translatable="yes">Aplicación de vigilancia</property>
+            <layout manager="pack">
+              <property name="anchor">center</property>
+              <property name="expand">true</property>
+              <property name="ipadx">0</property>
+              <property name="ipady">20</property>
+              <property name="pady">0</property>
+              <property name="side">top</property>
+            </layout>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="ttk.Frame" id="frame5">
+        <property name="height">0</property>
+        <property name="width">200</property>
+        <layout manager="pack">
+          <property name="anchor">center</property>
+          <property name="expand">true</property>
+          <property name="pady">0</property>
+          <property name="side">top</property>
+        </layout>
+        <child>
+          <object class="ttk.Label" id="label6" named="True">
+
+            <property name="font">TkTextFont</property>
+            <property name="padding">0</property>
+            <property name="text" translatable="yes">Correo</property>
+            <layout manager="pack">
+              <property name="expand">true</property>
+              <property name="ipadx">100</property>
+              <property name="ipady">0</property>
+              <property name="pady">0</property>
+              <property name="side">top</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Entry" id="email_input" named="True">
+            <property name="textvariable">string:email</property>
+            <layout manager="pack">
+              <property name="ipadx">57</property>
+              <property name="side">top</property>
+            </layout>
+            <property name="show"/></object>
+        </child>
+        <child>
+          <object class="ttk.Label" id="label7" named="True">
+
+            <property name="font">TkTextFont</property>
+            <property name="padding">0</property>
+            <property name="text" translatable="yes">Contraseña</property>
+            <layout manager="pack">
+              <property name="expand">true</property>
+              <property name="ipadx">88</property>
+              <property name="ipady">0</property>
+              <property name="pady">0</property>
+              <property name="side">top</property>
+            </layout>
+          </object>
+        </child>
+        <child>
+          <object class="ttk.Entry" id="password_input" named="True">
+            <property name="textvariable">string:password</property>
+            <layout manager="pack">
+              <property name="ipadx">57</property>
+              <property name="side">top</property>
+            </layout>
+          <property name="show">*</property></object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="ttk.Frame" id="frame6">
+        <property name="height">200</property>
+        <property name="width">200</property>
+        <layout manager="pack">
+          <property name="anchor">n</property>
+          <property name="expand">true</property>
+          <property name="side">top</property>
+        </layout>
+        <child>
+          <object class="ttk.Button" id="login_button" named="True">
+            <property name="text" translatable="yes">Iniciar sesión</property>
+            <bind sequence="&lt;ButtonPress&gt;" handler="callback" add="" />
+            <layout manager="pack">
+              <property name="expand">true</property>
+              <property name="side">top</property>
+            </layout>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
