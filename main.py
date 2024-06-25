@@ -4,12 +4,12 @@ import os
 import tkinter as tk
 from tkinter import messagebox
 import requests
-import subprocess
 from cryptography.fernet import Fernet
 from dotenv import load_dotenv
 
 from ZuriCamui import login_windowUI
 from email_verification import is_valid_email
+from vigilance import vigilance
 
 # Cargar las variables de entorno del archivo .env
 load_dotenv()
@@ -81,8 +81,8 @@ class login_window(login_windowUI):
                 with open('key.txt', 'wb') as f:
                     f.write(key)
 
-                # Ejecutar vigilance.py y cerrar la ventana
-                subprocess.Popen(['python', 'vigilance.py'])
+                #Llamar a la función vigilance
+                vigilance()
 
             except requests.exceptions.RequestException as e:
                 email_input.configure(state='enabled')
