@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import datetime
 import os
 import tkinter as tk
 from tkinter import messagebox
@@ -26,12 +27,9 @@ class login_window(login_windowUI):
         email_input = self.builder.get_object('email_input')
         password_input = self.builder.get_object('password_input')
 
-        email = "user11@example.com"
-        password = "password"
-
         # Obtener los valores ingresados
-        #email = email_input.get()
-        #password = password_input.get()
+        email = email_input.get()
+        password = password_input.get()
 
         if is_valid_email(email) and password != "" and len(password) > 6:
             # Desactivar campos y botón
@@ -42,7 +40,10 @@ class login_window(login_windowUI):
                 # Realizar la solicitud POST para obtener el token
                 response = requests.post(
                     os.getenv("DATA_URL_TOKEN"),
-                    data={'username': email, 'password': password}
+                    data={
+                        'username': email,
+                        'password': password
+                    }
                 )
                 response.raise_for_status()
 
