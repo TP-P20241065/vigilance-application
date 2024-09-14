@@ -6,7 +6,6 @@ pygubu~=0.35.3
 requests~=2.31.0
 passlib~=1.7.4
 python-dotenv~=1.0.1
-cryptography~=42.0.8
 pygame~=2.5.2
 pyinstaller
 PyJWT~=2.9.0

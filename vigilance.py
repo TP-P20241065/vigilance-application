@@ -120,7 +120,7 @@ def vigilance():
                 "incident": str(input_report),
                 "trackingLink": "https://maps.app.goo.gl/PsJQiVvKxLcFXiEM9",
                 "image": "Imagen",
-                "unitId": 2
+                "unitId": int(os.getenv("UNIT_ID"))
             }
             headers = {
                 'Content-Type': 'application/json'
