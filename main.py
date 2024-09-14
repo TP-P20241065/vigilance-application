@@ -90,6 +90,6 @@ class login_window(login_windowUI):
 
 
 if __name__ == "__main__":
-    vigilance()
-    #app = login_window()
-    #app.run()
+    #vigilance()
+    app = login_window()
+    app.run()
