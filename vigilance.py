@@ -6,11 +6,19 @@ import tkinter as tk
 from tkinter import Listbox, Label, Button, Toplevel, Entry, messagebox
 import threading
 from PIL import Image, ImageTk, ImageGrab
-from cryptography.fernet import Fernet
 import pygame
 import requests
 from dotenv import load_dotenv
 from ultralytics import YOLO
+
+# Inicialización de variables globales
+detecting = False
+recording = False
+start_time = 0
+record_duration = 5
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = None
+record_timer = None
 
 
 def vigilance():
@@ -20,43 +28,19 @@ def vigilance():
     # Inicializar pygame mixer
     pygame.mixer.init()
 
-    # Leer la clave desde el archivo
-    key_file = 'key.txt'
-    if os.path.exists(key_file):
-        with open(key_file, 'rb') as f:
-            key = f.read().strip()
-        cipher_suite = Fernet(key)
-        os.remove(key_file)
-    else:
-        print("No se encontró el archivo de clave.")
-        key = None
-
-    # Leer el token cifrado desde el archivo
-    token_file = 'encrypted_token.txt'
-    if os.path.exists(token_file) and key:
-        with open(token_file, 'rb') as f:
-            encrypted_token = f.read().strip()
-        print("Token cifrado leído:", encrypted_token)
-
-        # Descifrar el token
-        access_token = cipher_suite.decrypt(encrypted_token).decode()
-        print("Token descifrado:", access_token)
-        os.remove(token_file)
-    else:
-        print("No se encontró el archivo de token cifrado o la clave.")
-        access_token = None
-
     # Configuración inicial de YOLO
-    model = YOLO('best.pt')
-    target_classes = ['gun', 'knife']
+    model = YOLO('best_v2.pt')
+    target_classes = ['pistola', 'cuchillo']
     class_names = model.names
     target_class_indices = [key for key, value in class_names.items() if value in target_classes]
     # Captura de video desde la cámara web
-    video_path = os.getenv("CAMERA")
+    video_path = int(os.getenv("CAMERA"))
+    error_path = "nodisponible.mp4"
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
-        messagebox.showerror("Error", "Error al abrir la cámara")
-        print("Error al abrir la cámara")
+        cap = cv2.VideoCapture(error_path)
+        #messagebox.showerror("Error", "Error al abrir la cámara")
+        print("Error al abrir la cámara 1")
 
     # Obtener la velocidad de frames del video
     fps = cap.get(cv2.CAP_PROP_FPS)
@@ -64,25 +48,9 @@ def vigilance():
         fps = 30  # Valor predeterminado si no se puede obtener fps
     frame_delay = int(1000 / fps)
 
-    # Variables para grabación y detección
-    detecting = False
-    recording = False
-    start_time = 0
-    record_duration = 5
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    out = None
-    record_timer = None
-
     # Crear carpeta para almacenar videos e imágenes si no existe
     os.makedirs('videos', exist_ok=True)
     os.makedirs('images', exist_ok=True)
-
-    # Función para listar videos
-    def list_videos():
-        videos = [f for f in os.listdir('videos') if f.startswith('deteccion')]
-        listbox.delete(0, tk.END)
-        for video in videos:
-            listbox.insert(tk.END, video)
 
     # Función para listar imágenes
     def list_images():
@@ -93,36 +61,7 @@ def vigilance():
 
     # Variables para mantener el estado del video actual
     current_video_cap = None
-    current_video_thread = None
     stop_video = False
-
-    # Función para reproducir video en Tkinter
-    def play_video(video_path):
-        global current_video_cap, stop_video, current_video_thread
-
-        if current_video_thread and current_video_thread.is_alive():
-            stop_video = True
-            current_video_thread.join()
-
-        current_video_cap = cv2.VideoCapture(video_path)
-        stop_video = False
-
-        def update_frame():
-            while not stop_video:
-                ret, frame = current_video_cap.read()
-                if not ret:
-                    break
-
-                frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-                frame_image = ImageTk.PhotoImage(Image.fromarray(frame))
-
-                video_label.config(image=frame_image)
-                video_label.image = frame_image
-
-                time.sleep(1 / fps)
-
-        current_video_thread = threading.Thread(target=update_frame)
-        current_video_thread.start()
 
     # Función para manejar la selección de video
     def on_video_select(event):
@@ -177,12 +116,11 @@ def vigilance():
             time = str(datetime.datetime.now())
             time = time.split('.')[0]
             data = {
-                "Id": 0,
-                "DateTime": time,
-                "Address": "Dentro del bus",
-                "Incident": "Incidencia 1",
-                "TrackingLink": "https://maps.app.goo.gl/PsJQiVvKxLcFXiEM9",
-                "Image": "Imagen"
+                "address": "Dentro del bus",
+                "incident": str(input_report),
+                "trackingLink": "https://maps.app.goo.gl/PsJQiVvKxLcFXiEM9",
+                "image": "Imagen",
+                "unitId": 2
             }
             headers = {
                 'Content-Type': 'application/json'
@@ -237,7 +175,7 @@ def vigilance():
     # Crear ventana separada para detección en tiempo real
     detection_window = tk.Toplevel(root)
     detection_window.title("Detección en tiempo real")
-    detection_window.geometry("800x600")
+    detection_window.geometry("1280x960")
 
     # Frame y label para mostrar el video en tiempo real en la ventana separada
     video_frame = tk.Frame(detection_window)
