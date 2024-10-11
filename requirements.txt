@@ -1,3 +1,5 @@
+lapx
+numpy
 opencv-python
 pillow
 pygame
