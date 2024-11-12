@@ -1,12 +1,12 @@
+cx_freeze
 lapx
 numpy
 opencv-python
 pillow
 pygame
 pygubu
-pyinstaller
-PyJWT
 python-dotenv
 requests
 scikit-image
 ultralytics
+yt-dlp

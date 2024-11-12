@@ -1,18 +1,20 @@
 #!/usr/bin/python3
-import datetime
-import os
 import tkinter as tk
 from tkinter import messagebox
 import requests
-from dotenv import load_dotenv
+from endpoints import login
 from ZuriCamui import login_windowUI
 from email_verification import is_valid_email
-from vigilance import vigilance
-import jwt
-import torch
 
-# Cargar las variables de entorno del archivo .env
-load_dotenv()
+def lazy_get_all_cameras():
+    from endpoints import get_all_cameras  # Importación diferida
+    return get_all_cameras()
+
+
+def lazy_vigilance(access_token, cameras, units, time, master):
+    from vigilance import vigilance  # Importación diferida
+    vigilance(access_token, cameras, units, time, master)
+
 
 
 class login_window(login_windowUI):
@@ -23,73 +25,62 @@ class login_window(login_windowUI):
         self.master = master
 
     def callback(self, event=None):
-        # Obtener los objetos de entrada de texto
-        email_input = self.builder.get_object('email_input')
-        password_input = self.builder.get_object('password_input')
+        self.disable_interactions()
 
         # Obtener los valores ingresados
-        email = email_input.get()
-        password = password_input.get()
+        email = self.builder.get_object('email_input').get()
+        password = self.builder.get_object('password_input').get()
 
         if is_valid_email(email) and password != "" and len(password) > 6:
-            # Desactivar campos y botón
-            email_input.configure(state='disabled')
-            password_input.configure(state='disabled')
-            self.builder.get_object('login_button').configure(state='disabled')
+            # Realizar la solicitud POST para obtener el token
             try:
-                # Realizar la solicitud POST para obtener el token
-                response = requests.post(
-                    os.getenv("DATA_URL_TOKEN"),
-                    json={
-                        'email': email,
-                        'password': password
-                    },
-                    headers={
-                        'Content-Type': 'application/json'
-                    }
-                )
+                response = login(email, password)
                 response.raise_for_status()
                 token_data = response.json()
                 access_token = token_data.get('access_token')
-                print("access token")
-                print(access_token)
 
-                user_data = jwt.decode(access_token, options={"verify_signature": False})
-                print("User data")
-                print(user_data)
-                if 4 not in user_data.get('permissions', []):
-                    email_input.configure(state='enabled')
-                    password_input.configure(state='enabled')
-                    self.builder.get_object('login_button').configure(state='enabled')
-                    messagebox.showerror("Acceso Denegado", "No tienes permiso para el acceso a la vigilancia.")
-                    return
+                # Realizar la solicitud de cámaras
+                data = lazy_get_all_cameras()
 
-                # Cerrar la ventana actual
-                self.master.destroy()
+                # Extraer la lista de cámaras del campo `result` si existe
+                cameras = data.get('result', [])
 
-                #Llamar a la función vigilance
-                vigilance()
+                # Filtrar y obtener los unitid de cámaras sin ubicación en tiempo real
+                units = list({camera['unitId'] for camera in cameras if camera.get('location') != 'No tiene ubicación en tiempo real'})
 
+                # Verificar si units está vacío
+                if not units:
+                    self.enable_interactions()
+                    messagebox.showerror("Error",
+                    "Necesita al menos 1 unidad de transporte indexada con al menos 1 cámara de seguridad con ubicación en tiempo real.")
+                else:
+                    time = self.validated_time if self.validated_time != 0 else "0"
+                    #self.master.destroy()
+                    lazy_vigilance(access_token, cameras, units, time, self.master)
+
+
+            except requests.exceptions.HTTPError as e:
+                self.enable_interactions()
+                if response.status_code == 400:
+                    error_data = response.json()
+                    error_message = error_data.get("detail", "Error desconocido")
+                    messagebox.showerror("Error", error_message)
+                else:
+                    messagebox.showerror("Error", "Error de servidor, por favor intenta más tarde.")
             except requests.exceptions.RequestException as e:
-                email_input.configure(state='enabled')
-                password_input.configure(state='enabled')
-                self.builder.get_object('login_button').configure(state='enabled')
-                messagebox.showerror("Error", f"Error en la solicitud: {e}")
-            except ValueError as e:
-                email_input.configure(state='enabled')
-                password_input.configure(state='enabled')
-                self.builder.get_object('login_button').configure(state='enabled')
-                messagebox.showerror("Error", f"Error en la autenticación: {e}")
+                self.enable_interactions()
+                messagebox.showerror("Error", "Hubo un error al intentar conectar al servidor.")
+
         else:
-            errorMesssage = ""
+            self.enable_interactions()
+            error_messsage = ""
             if not is_valid_email(email):
-                errorMesssage += "- Correo inválido"
+                error_messsage += "- Correo inválido"
             if password == "" or len(password) <= 6:
-                errorMesssage += "\n- Contraseña inválida (Debe tener más de 6 caracteres)"
-            messagebox.showerror("Error", errorMesssage)
+                error_messsage += "\n- Contraseña inválida (Debe tener más de 6 caracteres)"
+            messagebox.showerror("Error", error_messsage)
 
 
 if __name__ == "__main__":
-    #vigilance()
     app = login_window()
     app.run()
